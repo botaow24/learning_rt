@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <tchar.h>
 
-
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <sstream>
+#include <mutex>
 
 // TODO: reference additional headers your program requires here
