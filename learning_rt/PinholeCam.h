@@ -1,6 +1,14 @@
 #pragma once
+const int g_blocksize = 64;
+const int g_color_channel = 4;
+
+
 class PinholeCam
 {
+	//static part
+
+	static const int height = 1920;
+	static const int weight = 1920;
 public:
 	~PinholeCam() ;
 
@@ -14,9 +22,9 @@ public:
 private:
 	PinholeCam() ;
 	void ThreadMain();
-	bool FetchBlock();
-	const int height_ = 1920;
-	const int weight_ = 1920;
-	const int blocksize_ = 64;
+	bool FetchBlock(int & out_w_idx,int & out_h_idx);
+private:
+
+	float image_[height][weight][g_color_channel]; // final image result
 };
 

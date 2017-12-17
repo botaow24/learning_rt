@@ -12,21 +12,51 @@ PinholeCam::~PinholeCam()
 {
 }
 
-bool PinholeCam::FetchBlock()
+// fetching blocks row by row
+bool PinholeCam::FetchBlock(int & out_w_idx, int & out_h_idx)
 {
 	static std::mutex mtx;
+
+	// image blocks index
+	// every block has 64 by 64 pixels (g_blocksize = 64)
+	static int current_w_idx = 0;
+	static int current_h_idx = 0;
+
+	// row id out of range, image done;
+	if (current_h_idx * g_blocksize > height)
+	{
+		return false;
+	}
+
 	mtx.lock();
+	out_w_idx = current_w_idx;
+	out_h_idx = current_h_idx;
+
+	current_w_idx++;
+	// current row done, fetch next one
+	if (current_w_idx * g_blocksize > weight)
+	{
+		current_w_idx = 0;
+		current_h_idx++;
+	}
 
 	mtx.unlock();
-	return false;
+	return true;
 }
 
 void PinholeCam::ThreadMain()
 {
+	float image_blocks[g_blocksize][g_blocksize][g_color_channel] = {};
+	int w_idx, h_idx;
 	while (true)
 	{
-		if (FetchBlock() == false)
+		if (FetchBlock(w_idx, h_idx) == false)
 			break;
+		// do rendering
+		// copy image blocks back
+
+
+		//printf("rendering blocks %d %d\n", w_idx, h_idx);
 	}
 }
 
