@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PinholeCam.h"
-
+#include "rtType.h"
 
 
 PinholeCam::PinholeCam()

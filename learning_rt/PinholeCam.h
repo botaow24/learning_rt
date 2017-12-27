@@ -27,4 +27,3 @@ private:
 
 	float image_[height][weight][g_color_channel]; // final image result
 };
-
