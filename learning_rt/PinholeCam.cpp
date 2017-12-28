@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "PinholeCam.h"
 #include "rtType.h"
-
+#include "Ray.h"
 
 PinholeCam::PinholeCam()
 {
@@ -44,14 +44,40 @@ bool PinholeCam::FetchBlock(int & out_w_idx, int & out_h_idx)
 	return true;
 }
 
+void PinholeCam::GenRay(int w, int h, Ray & r)
+{
+	const glm::vec3 eye = glm::vec3(0.0f, 0.0f, -4.0f);
+	const glm::vec3 cent = glm::vec3(0.0f, 0.0f, 0.0f);
+	const float half_room = 4;
+	const int hw = weight / 2;
+	const int hh = height / 2;
+	const glm::vec3 lookat = cent + glm::vec3(half_room * (w - hw)/ hw , half_room * (h - hh) / hw,  0.0f);
+
+	r.o_ = eye;
+	r.d_ = glm::normalize(lookat - eye);
+	r.tMax_ = std::numeric_limits<float>::infinity();
+}
+
 void PinholeCam::ThreadMain()
 {
-	float image_blocks[g_blocksize][g_blocksize][g_color_channel] = {};
+	glm::vec4 image_blocks[g_blocksize][g_blocksize] = {};
 	int w_idx, h_idx;
 	while (true)
 	{
 		if (FetchBlock(w_idx, h_idx) == false)
 			break;
+
+		for (int x_idx = 0; x_idx < g_blocksize; x_idx++)
+		{
+			for (int y_idx = 0; y_idx < g_blocksize; y_idx ++ )
+			{
+				Ray();
+				int pixel_x = x_idx + w_idx * g_blocksize;
+				int pixel_y = y_idx + h_idx * g_blocksize;
+			}
+		}
+
+		
 		// do rendering
 		// copy image blocks back
 

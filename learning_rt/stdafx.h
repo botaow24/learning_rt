@@ -19,5 +19,5 @@
 
 #include "ext\glm\glm\glm.hpp"
 
-
+#include "ext\tinyobjloader\tiny_obj_loader.h"
 // TODO: reference additional headers your program requires here

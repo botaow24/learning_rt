@@ -1,3 +1,6 @@
 [submodule "learning_rt/ext/glm"]
 	path = learning_rt/ext/glm
 	url = git://github.com/g-truc/glm.git
+[submodule "learning_rt/ext/tinyobjloader"]
+	path = learning_rt/ext/tinyobjloader
+	url = git://github.com/syoyo/tinyobjloader.git

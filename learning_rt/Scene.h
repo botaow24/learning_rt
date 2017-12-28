@@ -9,7 +9,10 @@ public:
 
 private:
 	Scene();
-	void objLoader(const std::string & path);
-	void mtlLoader(const std::string & path);
+	void objLoader(const std::string & objname,const std::string & folder_path);
+
+	tinyobj::attrib_t attrib_;
+	std::vector<tinyobj::shape_t> shapes_;
+	std::vector<tinyobj::material_t> materials_;
 };
 
