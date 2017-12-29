@@ -6,5 +6,7 @@ public:
 	Triangle();
 	~Triangle();
 
+
+
 };
 

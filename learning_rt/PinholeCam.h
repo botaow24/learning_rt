@@ -8,8 +8,8 @@ class PinholeCam
 {
 	//static part
 
-	static const int height = 1920;
-	static const int weight = 1920;
+	static const int height = 1920/2;
+	static const int width = 1920/2;
 public:
 	~PinholeCam() ;
 
@@ -19,7 +19,7 @@ public:
 	}
 
 	void run();
-
+	void showImage();
 private:
 	PinholeCam() ;
 	void ThreadMain();
@@ -27,5 +27,5 @@ private:
 	void GenRay(int w, int h, Ray & r);
 private:
 
-	glm::vec4 image_[height][weight]; // final image result
+	glm::vec4 image_[width][height]; // final image result
 };

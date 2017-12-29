@@ -1,4 +1,6 @@
 #pragma once
+
+class Triangle;
 class Scene
 {
 public:
@@ -14,5 +16,7 @@ private:
 	tinyobj::attrib_t attrib_;
 	std::vector<tinyobj::shape_t> shapes_;
 	std::vector<tinyobj::material_t> materials_;
+
+	std::vector<Triangle> triangle_v_;
 };
 

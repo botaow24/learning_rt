@@ -2,6 +2,7 @@
 #include "Scene.h"
 #define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
 #include "ext\tinyobjloader\tiny_obj_loader.h"
+#include "Triangle.h"
 Scene::Scene()
 {
 }
@@ -14,6 +15,9 @@ Scene::~Scene()
 void Scene::Load()
 {
 	objLoader("scene01.obj", "scene_1_obj/" );
+
+	//triangle_v_.reserve(attrib.vertices.size() / 3);
+
 }
 
 static void PrintInfo(const tinyobj::attrib_t& attrib,
