@@ -107,7 +107,6 @@ void PinholeCam::ThreadMain()
 void PinholeCam::run()
 {
 	unsigned int num_core = std::thread::hardware_concurrency();
-	num_core = 1;
 	if (num_core == 0)
 	{
 		std::cout << "Get core count failed" << std::endl;
@@ -118,7 +117,7 @@ void PinholeCam::run()
 		std::cout << "Launching "<< num_core << std::endl;
 	}
 	std::vector<std::thread> thread_vector;
-
+	auto t1 = std::chrono::high_resolution_clock::now();
 	for (unsigned int i = 0; i < num_core; i++)
 	{
 		thread_vector.emplace_back(&PinholeCam::ThreadMain,this);
@@ -128,7 +127,9 @@ void PinholeCam::run()
 	{
 		ti.join();
 	}
+	auto t2 = std::chrono::high_resolution_clock::now();
 	std::cout << "All threads joined "  << std::endl;
+	std::cout << "It tooks "<< std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() <<"milliseconds" << std::endl;
 }
 
 void PinholeCam::showImage()

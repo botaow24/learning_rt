@@ -5,8 +5,22 @@ public:
 	Ray();
 	Ray(const glm::vec3 &_o, const glm::vec3 & _d,float _tMax = std::numeric_limits<float>::infinity());
 	~Ray();
+	void initRay();
+	
+	glm::vec3 Permute2Z(const glm::vec3 &v) const { return glm::vec3(v[kx], v[ky], v[kz]); }
+
 	glm::vec3 o_;
 	glm::vec3 d_;
+	glm::mat3 permute2z_;
 	mutable float tMax_;
+
+	// Sheer
+	float  sx,sy, sz;
+private:
+	void computePermute();
+	void computeSheer();
+	// Permute
+	int kx, ky,kz;
+
 };
 

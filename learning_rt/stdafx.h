@@ -16,6 +16,7 @@
 #include <vector>
 #include <sstream>
 #include <mutex>
+#include <chrono>
 
 #include "ext\glm\glm\glm.hpp"
 
