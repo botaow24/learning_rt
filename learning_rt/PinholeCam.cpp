@@ -1,11 +1,17 @@
 #include "stdafx.h"
+#include <opencv2\opencv.hpp>
 #include "PinholeCam.h"
-#include<opencv2\opencv.hpp>
+#include <thread>
+#include <mutex>
+
 #include "rtType.h"
 #include "Ray.h"
-
+#include "Scene.h"
+#include "Triangle.h"
 PinholeCam::PinholeCam()
+	:img_(cv::Size(width, height), CV_8UC4)
 {
+
 }
 
 
@@ -22,14 +28,17 @@ bool PinholeCam::FetchBlock(int & out_w_idx, int & out_h_idx)
 	// every block has 64 by 64 pixels (g_blocksize = 64)
 	static int current_w_idx = 0;
 	static int current_h_idx = 0;
+	static int counter = 0;
+	static int display = 0;
 
+
+	mtx.lock();
 	// row id out of range, image done;
 	if (current_h_idx * g_blocksize >= height)
 	{
+		mtx.unlock();
 		return false;
 	}
-
-	mtx.lock();
 	out_w_idx = current_w_idx;
 	out_h_idx = current_h_idx;
 
@@ -40,22 +49,61 @@ bool PinholeCam::FetchBlock(int & out_w_idx, int & out_h_idx)
 		current_w_idx = 0;
 		current_h_idx++;
 	}
+	printf("%f %% \n",counter * 1.0f/ (height* width / g_blocksize/ g_blocksize) * 100);
+	if(display * 10 >= (height* width / g_blocksize / g_blocksize))
+	{
+		display = 0;
+	}
+
+	display++;
+	counter++;
 	mtx.unlock();
 	return true;
 }
 
 void PinholeCam::GenRay(int w, int h, Ray & r)
 {
-	const glm::vec3 eye = glm::vec3(0.0f, 0.0f, -4.0f);
-	const glm::vec3 cent = glm::vec3(0.0f, 0.0f, 0.0f);
-	const float half_room = 4;
+	const glm::vec3 eye = glm::vec3(0.0f, 5.0f, 15.2f);
+	const glm::vec3 cent = eye + glm::vec3(0.0f,0.0f,-8.6595f);
+	const float half_room =  5;
 	const int hw = width / 2;
 	const int hh = height / 2;
-	const glm::vec3 lookat = cent + glm::vec3(half_room * (w - hw)/ hw , half_room * (h - hh) / hw,  0.0f);
+	// switch h,w
+	// upside down
+	const glm::vec3 lookat = cent + glm::vec3( half_room * (h - hh) / hw, - half_room * (w - hw) / hw,  0.0f);
 
 	r.o_ = eye;
 	r.d_ = glm::normalize(lookat - eye);
 	r.tMax_ = std::numeric_limits<float>::infinity();
+}
+
+void PinholeCam::DispThread()
+{
+	
+	while (rendering_done == false)
+	{
+		showImage();
+		cv::waitKey(100);
+	}
+	showImage();
+	//cv::imwrite("test.bmp", img_);
+
+	cv::waitKey(0);
+}
+
+glm::vec4 PinholeCam::shader(Ray &ray)
+{
+	glm::vec3 bec;
+	const Triangle *ptr = nullptr;
+	Scene::GetIns().findIntersectNoAccel(ray, bec, ptr);
+	if (ptr != nullptr)
+	{
+		int idx = ptr->GetMatId();
+		const tinyobj::material_t & mat = Scene::GetIns().GetMat()[idx];
+		return glm::vec4(mat.diffuse[0], mat.diffuse[1],mat.diffuse[2],1.0f);
+		//return glm::vec4(1.0f);
+	}
+	return glm::vec4(0.0f);
 }
 
 void PinholeCam::ThreadMain()
@@ -76,10 +124,8 @@ void PinholeCam::ThreadMain()
 				int pixel_w = w_idx + w_base_idx * g_blocksize;
 				int pixel_h = h_idx + h_base_idx * g_blocksize;
 				GenRay(pixel_w, pixel_h, main_ray);
-				if(pixel_w == pixel_h)
-					image_blocks[w_idx][h_idx] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-				else
-					image_blocks[w_idx][h_idx] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+				image_blocks[w_idx][h_idx] = shader(main_ray);
 			}
 		}
 
@@ -106,6 +152,8 @@ void PinholeCam::ThreadMain()
 
 void PinholeCam::run()
 {
+	std::thread displayThread(&PinholeCam::DispThread, this);
+
 	unsigned int num_core = std::thread::hardware_concurrency();
 	if (num_core == 0)
 	{
@@ -130,18 +178,19 @@ void PinholeCam::run()
 	auto t2 = std::chrono::high_resolution_clock::now();
 	std::cout << "All threads joined "  << std::endl;
 	std::cout << "It tooks "<< std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() <<"milliseconds" << std::endl;
+	rendering_done = true;
+	displayThread.join();
 }
 
 void PinholeCam::showImage()
 {
 	auto clp = [](float a) { if (a > 255) return 255.0f; else if (a < 0)return 0.0f; return a; };
-	cv::Mat img(cv::Size(width, height), CV_8UC4);
 	for (int w = 0; w < width; w++)
 	{
 		for (int h = 0; h < height; h++)
 		{
 
-			auto &pixel = img.at<cv::Vec4b>(w, h);
+			auto &pixel = img_.at<cv::Vec4b>(w, h);
 			pixel[0] = (uchar)clp(image_[w][h].b * 255);
 			pixel[1] = (uchar)clp(image_[w][h].g * 255);
 			pixel[2] = (uchar)clp(image_[w][h].r * 255);
@@ -150,8 +199,5 @@ void PinholeCam::showImage()
 		}
 
 	}
-	cv::namedWindow("result");
-	cv::imshow("result", img);
-	cv::imwrite("test.bmp", img);
-	cv::waitKey(0);
+	cv::imshow("result", img_);
 }

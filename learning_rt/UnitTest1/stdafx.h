@@ -7,16 +7,7 @@
 
 #include "targetver.h"
 
-#include <stdio.h>
-#include <tchar.h>
+// Headers for CppUnitTest
+#include "CppUnitTest.h"
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#include <chrono>
-
-#include "ext\glm\glm\glm.hpp"
-
-#include "ext\tinyobjloader\tiny_obj_loader.h"
 // TODO: reference additional headers your program requires here

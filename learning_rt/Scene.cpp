@@ -3,6 +3,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
 #include "ext\tinyobjloader\tiny_obj_loader.h"
 #include "Triangle.h"
+#include "Ray.h"
 Scene::Scene()
 {
 }
@@ -16,8 +17,24 @@ void Scene::Load()
 {
 	objLoader("scene01.obj", "scene_1_obj/" );
 
+	initNoAccel();
 	//triangle_v_.reserve(attrib.vertices.size() / 3);
 
+}
+
+void Scene::findIntersectNoAccel(Ray & r, glm::vec3 &bec, const  Triangle  * & tri_hit) const
+{
+	float tHit;
+	tri_hit = nullptr;
+	r.initRay();
+	for (const auto &tri : triangle_v_)
+	{
+		if (tri.Intersect(r, bec, tHit) == true)
+		{
+			r.tMax_ = tHit;
+			tri_hit = &tri;
+		}
+	}
 }
 
 static void PrintInfo(const tinyobj::attrib_t& attrib,
@@ -186,11 +203,28 @@ static void PrintInfo(const tinyobj::attrib_t& attrib,
 	}
 }
 
+void Scene::initNoAccel()
+{
+	size_t total_face = 0;
+
+	for (auto & sp : shapes_)
+	{
+		total_face += sp.mesh.indices.size();
+	}
+	total_face /= 3;
+	triangle_v_.reserve(total_face);
+	for (auto & sp : shapes_)
+	{
+		for (int i = 0; i < sp.mesh.indices.size(); i += 3)
+		{
+			triangle_v_.emplace_back(Triangle(i, &sp.mesh, &attrib_));
+		}
+	}
+
+}
+
 void Scene::objLoader(const std::string & objname, const std::string & folder_path)
 {
-	tinyobj::attrib_t attrib_;
-	std::vector<tinyobj::shape_t> shapes_;
-	std::vector<tinyobj::material_t> materials_;
 	std::string err;
 
 	bool ret = tinyobj::LoadObj(

@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-
+#include <opencv2\opencv.hpp>
 
 #include "PinholeCam.h"
 #include "Scene.h"
@@ -10,7 +10,6 @@ int main()
 {
 	Scene::GetIns().Load();
 	PinholeCam::GetIns().run();
-	PinholeCam::GetIns().showImage();
 
 	return 0;
 }
