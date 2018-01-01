@@ -15,7 +15,7 @@
 #include <vector>
 #include <sstream>
 #include <chrono>
-
+#include <algorithm>
 #include "ext\glm\glm\glm.hpp"
 
 #include "ext\tinyobjloader\tiny_obj_loader.h"

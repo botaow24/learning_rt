@@ -2,6 +2,7 @@
 
 class Triangle;
 class Ray;
+class BVH;
 class Scene
 {
 public:
@@ -10,11 +11,13 @@ public:
 
 	void Load();
 	void findIntersectNoAccel (Ray & r, glm::vec3 & bec,const Triangle * & tri_hit) const;
+	void findIntersectBVH(Ray & r, glm::vec3 & bec, const Triangle * & tri_hit) const;
 	const std::vector<tinyobj::material_t> & GetMat()const  {	return materials_;	};
 private:
 	Scene();
 
 	void initNoAccel();
+	void initBVH();
 	void objLoader(const std::string & objname,const std::string & folder_path);
 
 	tinyobj::attrib_t attrib_;
@@ -22,5 +25,7 @@ private:
 	std::vector<tinyobj::material_t> materials_;
 
 	std::vector<Triangle> triangle_v_;
+	BVH * bvh = nullptr;
+
 };
 

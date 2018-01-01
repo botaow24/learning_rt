@@ -4,6 +4,7 @@
 #include "ext\tinyobjloader\tiny_obj_loader.h"
 #include "Triangle.h"
 #include "Ray.h"
+#include "BVH.h"
 Scene::Scene()
 {
 }
@@ -11,6 +12,7 @@ Scene::Scene()
 
 Scene::~Scene()
 {
+	delete bvh;
 }
 
 void Scene::Load()
@@ -18,6 +20,7 @@ void Scene::Load()
 	objLoader("scene01.obj", "scene_1_obj/" );
 
 	initNoAccel();
+	initBVH();
 	//triangle_v_.reserve(attrib.vertices.size() / 3);
 
 }
@@ -35,6 +38,11 @@ void Scene::findIntersectNoAccel(Ray & r, glm::vec3 &bec, const  Triangle  * & t
 			tri_hit = &tri;
 		}
 	}
+}
+
+void Scene::findIntersectBVH(Ray & r, glm::vec3 & bec, const Triangle * & tri_hit) const
+{
+	bvh->Intersect(r, bec, tri_hit);
 }
 
 static void PrintInfo(const tinyobj::attrib_t& attrib,
@@ -221,6 +229,19 @@ void Scene::initNoAccel()
 		}
 	}
 
+}
+
+void Scene::initBVH()
+{
+	std::vector<Triangle *> tri_list;
+	for (auto & tri  : triangle_v_)
+	{
+		tri_list.emplace_back(&tri);
+	}
+	bvh = new BVH();
+	auto root = bvh->BVHBuilder(tri_list,0, tri_list.size());
+	bvh->root_ = root;
+	std::cout << "bvh " << bvh->triangle_order_list_.size() << std::endl;
 }
 
 void Scene::objLoader(const std::string & objname, const std::string & folder_path)

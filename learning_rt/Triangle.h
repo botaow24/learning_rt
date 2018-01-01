@@ -1,12 +1,13 @@
 #pragma once
 
 class Ray;
-
+class BB3;
 class Triangle
 {
 public:
 	Triangle(int idx, tinyobj::mesh_t *, tinyobj::attrib_t *);
 	~Triangle();
+	BB3 GetBB() const;
 	int GetMatId() const;
 	int GetIdx() const { return p_idx; }
 	bool Intersect (const Ray & r , glm::vec3 & out_barycentric,float & out_thit)const;

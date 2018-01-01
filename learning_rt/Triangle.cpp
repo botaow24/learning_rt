@@ -2,7 +2,7 @@
 #include "Triangle.h"
 
 #include"Ray.h"
-
+#include "BB3.h"
 
 Triangle::Triangle(int idx, tinyobj::mesh_t *ptr_m, tinyobj::attrib_t * ptr_a)
 	:p_idx(idx), mesh_(ptr_m), attrib_(ptr_a)
@@ -12,6 +12,18 @@ Triangle::Triangle(int idx, tinyobj::mesh_t *ptr_m, tinyobj::attrib_t * ptr_a)
 
 Triangle::~Triangle()
 {
+}
+
+BB3 Triangle::GetBB() const
+{
+	BB3 bb[3];
+	for (int i = 0; i < 3; i++)
+	{
+		int vid = mesh_->indices[p_idx + i].vertex_index;
+		auto temp = glm::vec3(attrib_->vertices[vid * 3], attrib_->vertices[vid * 3 + 1], attrib_->vertices[vid * 3 + 2]);
+		bb[i] = BB3(temp);
+	}
+	return bb[0].Union(bb[1].Union(bb[2]));
 }
 
 int Triangle::GetMatId() const

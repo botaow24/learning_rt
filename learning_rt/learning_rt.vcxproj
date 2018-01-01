@@ -157,6 +157,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BB3.h" />
+    <ClInclude Include="BVH.h" />
     <ClInclude Include="PinholeCam.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="rtType.h" />
@@ -166,6 +168,8 @@
     <ClInclude Include="Triangle.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BB3.cpp" />
+    <ClCompile Include="BVH.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PinholeCam.cpp" />
     <ClCompile Include="Ray.cpp" />
