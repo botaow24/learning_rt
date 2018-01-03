@@ -1,4 +1,5 @@
 #pragma once
+class Ray;
 class BB3
 {
 public:
@@ -8,6 +9,7 @@ public:
 	BB3 Union(const BB3 &);
 	BB3 Cent();
 	int GetMaxDim();
+	bool Intersect( const Ray & ,float & tClose, float &tFar);
 	glm::vec3 min_;
 	glm::vec3 max_;
 };

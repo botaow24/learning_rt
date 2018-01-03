@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BB3.h"
-
+#include "Ray.h"
 
 BB3::BB3(glm::vec3 v)
 	:min_(v),max_(v)
@@ -48,4 +48,25 @@ int BB3::GetMaxDim()
 			return 2;
 	}
 	return 0;
+}
+
+bool BB3::Intersect(const Ray &r,float & tClose, float & tFar)
+{
+	float t0 = 0;
+	float t1 = r.tMax_;
+	for (int i = 0; i < 3; i++)
+	{
+		float invRay = 1 / r.d_[i];
+		float near = (min_[i] - r.o_[i]) * invRay;
+		float far = (max_[i] - r.o_[i])  * invRay;
+
+		// TODO: robust intersection
+		if (near > far)
+			std::swap(near, far);
+		t0 = std::max(t0,near);
+		t1 = std::min(t1, far);
+		if (t0 > t1)
+			return false;
+	}
+	return false;
 }
