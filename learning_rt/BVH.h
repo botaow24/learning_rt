@@ -14,6 +14,13 @@ public:
 	BVHNode *child[2] = {nullptr,nullptr};
 };
 
+class BVHFlatNode
+{
+public:
+	BB3 bb_;
+	size_t start_id_or_second_child;
+	size_t number_of_triangle;
+};
 
 class BVH
 {
@@ -28,5 +35,6 @@ public:
 	std::vector<Triangle *> triangle_order_list_;
 	SplitMethod sm = SplitMethod::equal_size;
 	BVHNode *root_;
+	std::vector<BVHFlatNode> bvh_node_;
 };
 

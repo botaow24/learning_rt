@@ -68,5 +68,7 @@ bool BB3::Intersect(const Ray &r,float & tClose, float & tFar)
 		if (t0 > t1)
 			return false;
 	}
-	return false;
+	tClose = t0;
+	tFar = t1;
+	return true;
 }
