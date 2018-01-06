@@ -8,6 +8,7 @@
 #include "Ray.h"
 #include "Scene.h"
 #include "Triangle.h"
+#include "SurfaceInteraction.h"
 PinholeCam::PinholeCam()
 	:img_(cv::Size(width, height), CV_8UC4)
 {
@@ -79,7 +80,6 @@ void PinholeCam::GenRay(int w, int h, Ray & r)
 
 void PinholeCam::DispThread()
 {
-	
 	while (rendering_done == false)
 	{
 		showImage();
@@ -91,11 +91,27 @@ void PinholeCam::DispThread()
 	cv::waitKey(0);
 }
 
-glm::vec4 PinholeCam::shader(Ray &ray)
+glm::vec4 PinholeCam::PathIntegrator(Ray & ray)
 {
-	glm::vec3 bec;
+	glm::vec4 result(0.0f) , beta(1.0f);
+	const int max_deep = 16;
+	for (int iter_num = 0;; iter_num++)
+	{
+		SurfaceInteraction surf;
+		const Triangle *ptr = nullptr;
+		Scene::GetIns().findIntersectBVH(ray, surf, ptr);
+		if (ptr == nullptr || iter_num >= max_deep)
+			break;
+
+	}
+	return result;
+}
+
+glm::vec4 PinholeCam::simpleShader(Ray &ray)
+{
+	SurfaceInteraction surf;
 	const Triangle *ptr = nullptr;
-	Scene::GetIns().findIntersectBVH(ray, bec, ptr);
+	Scene::GetIns().findIntersectBVH(ray, surf, ptr);
 	if (ptr != nullptr)
 	{
 		int idx = ptr->GetMatId();
@@ -125,7 +141,7 @@ void PinholeCam::ThreadMain()
 				int pixel_h = h_idx + h_base_idx * g_blocksize;
 				GenRay(pixel_w, pixel_h, main_ray);
 
-				image_blocks[w_idx][h_idx] = shader(main_ray);
+				image_blocks[w_idx][h_idx] = simpleShader(main_ray);
 			}
 		}
 
@@ -133,6 +149,7 @@ void PinholeCam::ThreadMain()
 		// copy image blocks back
 		for (int w_idx = 0; w_idx < g_blocksize; w_idx++)
 		{
+
 			for (int h_idx = 0; h_idx < g_blocksize; h_idx++)
 			{
 				int pixel_w = w_idx + w_base_idx * g_blocksize;
@@ -144,6 +161,11 @@ void PinholeCam::ThreadMain()
 					std::cout << "h" <<pixel_h << std::endl;
 
 			}
+			/*
+			int pixel_w = w_idx + w_base_idx * g_blocksize;
+			int pixel_h_bg = h_base_idx * g_blocksize;
+			std::copy(&image_blocks[w_idx][0], &image_blocks[w_idx][g_blocksize], &image_[pixel_w][pixel_h_bg]);
+			*/
 		}
 
 		//printf("rendering blocks %d %d\n", w_idx, h_idx);
@@ -155,7 +177,6 @@ void PinholeCam::run()
 	std::thread displayThread(&PinholeCam::DispThread, this);
 
 	unsigned int num_core = std::thread::hardware_concurrency();
-	num_core = 16;
 	if (num_core == 0)
 	{
 		std::cout << "Get core count failed" << std::endl;
@@ -171,7 +192,6 @@ void PinholeCam::run()
 	{
 		thread_vector.emplace_back(&PinholeCam::ThreadMain,this);
 	}
-
 	for (auto &ti : thread_vector)
 	{
 		ti.join();

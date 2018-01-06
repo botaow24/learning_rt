@@ -3,6 +3,7 @@
 class Triangle;
 class Ray;
 class BVH;
+class SurfaceInteraction;
 class Scene
 {
 public:
@@ -11,7 +12,7 @@ public:
 
 	void Load();
 	void findIntersectNoAccel (Ray & r, glm::vec3 & bec,const Triangle * & tri_hit) const;
-	void findIntersectBVH(Ray & r, glm::vec3 & bec, const Triangle * & tri_hit) const;
+	void findIntersectBVH(Ray & r, SurfaceInteraction & surf, const Triangle * & tri_hit) const;
 	const std::vector<tinyobj::material_t> & GetMat()const  {	return materials_;	};
 private:
 	Scene();

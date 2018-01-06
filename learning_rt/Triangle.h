@@ -2,6 +2,7 @@
 
 class Ray;
 class BB3;
+class SurfaceInteraction;
 class Triangle
 {
 public:
@@ -11,7 +12,9 @@ public:
 	int GetMatId() const;
 	int GetIdx() const { return p_idx; }
 	bool Intersect (const Ray & r , glm::vec3 & out_barycentric,float & out_thit)const;
+	bool Intersect(const Ray & r, SurfaceInteraction &, float & out_thit)const;
 	static bool Intersect(const Ray & r,const glm::vec3(& p)[3], glm::vec3 & out_barycentric, float & out_thit);
+	static bool Intersect(const Ray & r, const glm::vec3(&p)[3], SurfaceInteraction &, float & out_thit);
 private:
 	const int p_idx;
 

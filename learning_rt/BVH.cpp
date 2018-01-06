@@ -34,7 +34,7 @@ size_t BVH::buildFlatBVH(BVHNode * node_root)
 	}
 }
 
-bool BVH::Intersect(const Ray & r, glm::vec3 & out_barycentric, const Triangle * &tri_hit) const
+bool BVH::Intersect(const Ray & r, SurfaceInteraction & surf, const Triangle * &tri_hit) const
 {
 	bool hit = false;
 	tri_hit = nullptr;

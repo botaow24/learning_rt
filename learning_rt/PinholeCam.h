@@ -21,7 +21,8 @@ public:
 	void run();
 
 private:
-	glm::vec4 shader(Ray &);
+	glm::vec4 PathIntegrator(Ray &);
+	glm::vec4 simpleShader(Ray &);
 	PinholeCam() ;
 	void ThreadMain();
 	bool FetchBlock(int & out_w_idx,int & out_h_idx);

@@ -41,10 +41,10 @@ void Scene::findIntersectNoAccel(Ray & r, glm::vec3 &bec, const  Triangle  * & t
 	}
 }
 
-void Scene::findIntersectBVH(Ray & r, glm::vec3 & bec, const Triangle * & tri_hit) const
+void Scene::findIntersectBVH(Ray & r, SurfaceInteraction & surf, const Triangle * & tri_hit) const
 {
 	r.initRay();
-	bvh->Intersect(r, bec, tri_hit);
+	bvh->Intersect(r, surf, tri_hit);
 }
 
 static void PrintInfo(const tinyobj::attrib_t& attrib,

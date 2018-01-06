@@ -2,6 +2,7 @@
 #include "BB3.h"
 class Triangle;
 class Ray;
+class SurfaceInteraction;
 
 class BVHNode
 {
@@ -29,7 +30,7 @@ public:
 	BVH();
 	~BVH();
 	
-	bool Intersect(const Ray & r, glm::vec3 & out_barycentric, const Triangle * &)const;
+	bool Intersect(const Ray & r, SurfaceInteraction & surf, const Triangle * &)const;
 
 
 	SplitMethod sm = SplitMethod::equal_size;
