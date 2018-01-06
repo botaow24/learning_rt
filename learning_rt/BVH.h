@@ -30,11 +30,17 @@ public:
 	~BVH();
 	
 	bool Intersect(const Ray & r, glm::vec3 & out_barycentric, const Triangle * &)const;
-	BVHNode * BVHBuilder(std::vector<Triangle *>&, size_t start, size_t end);
-	
-	std::vector<Triangle *> triangle_order_list_;
+
+
 	SplitMethod sm = SplitMethod::equal_size;
-	BVHNode *root_;
+	//BVHNode *root_;
+
+
+	void BVHBuilder(std::vector<Triangle *>&);
+private:
+	BVHNode * BVHBuilder(std::vector<Triangle *>&, size_t start, size_t end);
+	size_t buildFlatBVH(BVHNode * node_root);
 	std::vector<BVHFlatNode> bvh_node_;
+	std::vector<Triangle *> triangle_order_list_;
 };
 

@@ -50,7 +50,7 @@ int BB3::GetMaxDim()
 	return 0;
 }
 
-bool BB3::Intersect(const Ray &r,float & tClose, float & tFar)
+bool BB3::Intersect(const Ray &r,float & tClose, float & tFar) const
 {
 	float t0 = 0;
 	float t1 = r.tMax_;

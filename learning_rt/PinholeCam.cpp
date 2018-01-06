@@ -95,7 +95,7 @@ glm::vec4 PinholeCam::shader(Ray &ray)
 {
 	glm::vec3 bec;
 	const Triangle *ptr = nullptr;
-	Scene::GetIns().findIntersectNoAccel(ray, bec, ptr);
+	Scene::GetIns().findIntersectBVH(ray, bec, ptr);
 	if (ptr != nullptr)
 	{
 		int idx = ptr->GetMatId();
@@ -155,6 +155,7 @@ void PinholeCam::run()
 	std::thread displayThread(&PinholeCam::DispThread, this);
 
 	unsigned int num_core = std::thread::hardware_concurrency();
+	num_core = 16;
 	if (num_core == 0)
 	{
 		std::cout << "Get core count failed" << std::endl;

@@ -9,7 +9,7 @@ public:
 	BB3 Union(const BB3 &);
 	BB3 Cent();
 	int GetMaxDim();
-	bool Intersect( const Ray & ,float & tClose, float &tFar);
+	bool Intersect( const Ray & ,float & tClose, float &tFar) const;
 	glm::vec3 min_;
 	glm::vec3 max_;
 };

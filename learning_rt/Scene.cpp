@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "Scene.h"
-#define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
-#include "ext\tinyobjloader\tiny_obj_loader.h"
 #include "Triangle.h"
 #include "Ray.h"
 #include "BVH.h"
+#define TINYOBJLOADER_IMPLEMENTATION // define this in only *one* .cc
+#include "ext\tinyobjloader\tiny_obj_loader.h"
+
 Scene::Scene()
 {
 }
@@ -42,6 +43,7 @@ void Scene::findIntersectNoAccel(Ray & r, glm::vec3 &bec, const  Triangle  * & t
 
 void Scene::findIntersectBVH(Ray & r, glm::vec3 & bec, const Triangle * & tri_hit) const
 {
+	r.initRay();
 	bvh->Intersect(r, bec, tri_hit);
 }
 
@@ -239,9 +241,9 @@ void Scene::initBVH()
 		tri_list.emplace_back(&tri);
 	}
 	bvh = new BVH();
-	auto root = bvh->BVHBuilder(tri_list,0, tri_list.size());
-	bvh->root_ = root;
-	std::cout << "bvh " << bvh->triangle_order_list_.size() << std::endl;
+	bvh->BVHBuilder(tri_list);
+	//bvh->root_ = root;
+	//std::cout << "bvh " << bvh->triangle_order_list_.size() << std::endl;
 }
 
 void Scene::objLoader(const std::string & objname, const std::string & folder_path)
@@ -258,5 +260,5 @@ void Scene::objLoader(const std::string & objname, const std::string & folder_pa
 	if (ret == false)
 		std::cout << err << std::endl;
 
-	PrintInfo(attrib_, shapes_, materials_);
+	//PrintInfo(attrib_, shapes_, materials_);
 }
