@@ -115,7 +115,7 @@ bool Triangle::Intersect(const Ray & r, const glm::vec3(&p)[3], glm::vec3 & out_
 	return true;
 }
 
-bool Triangle::Intersect(const Ray & r, const glm::vec3(&p)[3], SurfaceInteraction & surf, float & out_thit)
+bool Triangle::Intersect(const Ray & r, const glm::vec3(&p)[3], SurfaceInteraction & surf, float & out_thit)const
 {
 	// move Ray to (0,0,0)
 	glm::vec3 p0t = p[0] - r.o_;
@@ -172,6 +172,19 @@ bool Triangle::Intersect(const Ray & r, const glm::vec3(&p)[3], SurfaceInteracti
 	if (dis < 0 || dis > r.tMax_)
 		return false;
 	surf.point_ = b0 * p[0] + b1 * p[1] + b2 * p[2];
+	surf.ptr = this;
+	glm::vec3 norm[3];
+	GetNorm(norm);
+	surf.normal_ = b0 * norm[0] + b1 * norm[1] + b2 * norm[2];
 	out_thit = dis;
 	return true;
+}
+
+void Triangle::GetNorm(glm::vec3(&p)[3]) const
+{
+	for (int i = 0; i < 3; i++)
+	{
+		int nid = mesh_->indices[p_idx + i].normal_index;
+		p[i] = glm::vec3(attrib_->normals[nid * 3], attrib_->normals[nid * 3 + 1], attrib_->normals[nid * 3 + 2]);
+	}
 }
