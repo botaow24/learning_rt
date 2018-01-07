@@ -14,6 +14,32 @@ Triangle::~Triangle()
 {
 }
 
+float Triangle::Area()
+{
+	glm::vec3 p[3];
+	for (int i = 0; i < 3; i++)
+	{
+		int vid = mesh_->indices[p_idx + i].vertex_index;
+		p[i] = glm::vec3(attrib_->vertices[vid * 3], attrib_->vertices[vid * 3 + 1], attrib_->vertices[vid * 3 + 2]);
+	}
+	return glm::length(glm::cross(p[2] - p[0], p[1] - p[0])) / 2;
+}
+
+glm::vec3 Triangle::SampleOne(double r1,double r2)
+{
+	glm::vec3 p[3];
+	for (int i = 0; i < 3; i++)
+	{
+		int vid = mesh_->indices[p_idx + i].vertex_index;
+		p[i] = glm::vec3(attrib_->vertices[vid * 3], attrib_->vertices[vid * 3 + 1], attrib_->vertices[vid * 3 + 2]);
+	}
+
+	float sq1 = (float)sqrt(r1);
+	//float sq2 = sqrt(r2);
+
+	return (1-sq1) * p[0] + (sq1 * (1-(float)r2)) * p[1] + ((float)r2 * sq1) * p[2];
+}
+
 BB3 Triangle::GetBB() const
 {
 	BB3 bb[3];

@@ -8,7 +8,10 @@ class Triangle
 public:
 	Triangle(int idx, tinyobj::mesh_t *, tinyobj::attrib_t *);
 	~Triangle();
+	float Area();
+	glm::vec3 SampleOne(double r1, double r2);
 	BB3 GetBB() const;
+	const tinyobj::mesh_t * GetMesh()const { return mesh_; }
 	int GetMatId() const;
 	int GetIdx() const { return p_idx; }
 	bool Intersect (const Ray & r , glm::vec3 & out_barycentric,float & out_thit)const;

@@ -30,8 +30,6 @@ bool PinholeCam::FetchBlock(int & out_w_idx, int & out_h_idx)
 	static int current_w_idx = 0;
 	static int current_h_idx = 0;
 	static int counter = 0;
-	static int display = 0;
-
 
 	mtx.lock();
 	// row id out of range, image done;
@@ -51,12 +49,6 @@ bool PinholeCam::FetchBlock(int & out_w_idx, int & out_h_idx)
 		current_h_idx++;
 	}
 	printf("%f %% \n",counter * 1.0f/ (height* width / g_blocksize/ g_blocksize) * 100);
-	if(display * 10 >= (height* width / g_blocksize / g_blocksize))
-	{
-		display = 0;
-	}
-
-	display++;
 	counter++;
 	mtx.unlock();
 	return true;
@@ -86,22 +78,45 @@ void PinholeCam::DispThread()
 		cv::waitKey(100);
 	}
 	showImage();
-	//cv::imwrite("test.bmp", img_);
+	cv::imwrite("test.bmp", img_);
 
 	cv::waitKey(0);
 }
 
-glm::vec4 PinholeCam::PathIntegrator(Ray & ray)
+glm::vec4 PinholeCam::PathIntegrator(const Ray & ray)
 {
+	Ray main_ray = ray;
 	glm::vec4 result(0.0f) , beta(1.0f);
 	const int max_deep = 16;
 	for (int iter_num = 0;; iter_num++)
 	{
 		SurfaceInteraction surf;
 		const Triangle *ptr = nullptr;
-		Scene::GetIns().findIntersectBVH(ray, surf, ptr);
+		Scene::GetIns().findIntersectBVH(main_ray, surf, ptr);
 		if (ptr == nullptr || iter_num >= max_deep)
 			break;
+		int idx = ptr->GetMatId();
+		const tinyobj::material_t & mat = Scene::GetIns().GetMat()[idx];
+		if (true)
+		{
+			auto &li = Scene::GetIns().li;
+			glm::vec3 li_pos = li->GenOneSample();
+			Ray final_ray = surf.SpawnRay(li_pos - surf.point_);
+			//(surf.point_, );
+			final_ray.initRay();
+			SurfaceInteraction surffn;
+			const Triangle *trfn = nullptr;
+			Scene::GetIns().findIntersectBVH(final_ray, surffn, trfn);
+			if (trfn != nullptr && li->testMesh(trfn->GetMesh()))
+			{
+				const tinyobj::material_t & mat = Scene::GetIns().GetMat()[idx];
+				result += glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f);
+			}
+		}
+
+
+
+		break;
 
 	}
 	return result;
@@ -136,12 +151,17 @@ void PinholeCam::ThreadMain()
 		{
 			for (int h_idx = 0; h_idx < g_blocksize; h_idx++)
 			{
+				glm::dvec4 dv(0.0);
 				Ray main_ray;
 				int pixel_w = w_idx + w_base_idx * g_blocksize;
 				int pixel_h = h_idx + h_base_idx * g_blocksize;
 				GenRay(pixel_w, pixel_h, main_ray);
-
-				image_blocks[w_idx][h_idx] = simpleShader(main_ray);
+				const int sample_count = 128;
+				for(int i = 0; i < sample_count;i++)
+				{
+					dv += PathIntegrator(main_ray);
+				}
+				image_blocks[w_idx][h_idx] = glm::vec4(dv / (double)sample_count);
 			}
 		}
 
@@ -177,6 +197,7 @@ void PinholeCam::run()
 	std::thread displayThread(&PinholeCam::DispThread, this);
 
 	unsigned int num_core = std::thread::hardware_concurrency();
+//	num_core = 1;
 	if (num_core == 0)
 	{
 		std::cout << "Get core count failed" << std::endl;
@@ -220,5 +241,14 @@ void PinholeCam::showImage()
 		}
 
 	}
-	cv::imshow("result", img_);
+	if (height > 960)
+	{
+		cv::Mat disp;
+		cv::resize(img_, disp, cv::Size(960, 960));
+		cv::imshow("result", disp);
+	}
+	else
+	{
+		cv::imshow("result", img_);
+	}
 }

@@ -8,12 +8,37 @@
 
 Scene::Scene()
 {
+	
+}
+
+void Scene::initLi()
+{
+	li = new Light();
+	for(auto &mesh: shapes_)
+	{
+		if(mesh.name == light_name)
+			li->li_mesh = &mesh;
+	}
+
+	for (auto & tri : triangle_v_)
+	{
+		if (tri.GetMesh() == &li->li_mesh->mesh)
+		{
+			float area = tri.Area();
+			li->li_triangle_.emplace_back(&tri);
+			li->area.emplace_back(area);
+			li->total_area_ += area;
+		}
+	}
+	li->dst = std::discrete_distribution<>(li->area.begin(), li->area.end());
+	std::cout << "li size" << li->area.size() << std::endl;
 }
 
 
 Scene::~Scene()
 {
 	delete bvh;
+	delete li;
 }
 
 void Scene::Load()
@@ -22,6 +47,7 @@ void Scene::Load()
 
 	initNoAccel();
 	initBVH();
+	initLi();
 	//triangle_v_.reserve(attrib.vertices.size() / 3);
 
 }
@@ -230,7 +256,6 @@ void Scene::initNoAccel()
 			triangle_v_.emplace_back(Triangle(i, &sp.mesh, &attrib_));
 		}
 	}
-
 }
 
 void Scene::initBVH()
@@ -245,6 +270,7 @@ void Scene::initBVH()
 	//bvh->root_ = root;
 	//std::cout << "bvh " << bvh->triangle_order_list_.size() << std::endl;
 }
+
 
 void Scene::objLoader(const std::string & objname, const std::string & folder_path)
 {
@@ -261,4 +287,12 @@ void Scene::objLoader(const std::string & objname, const std::string & folder_pa
 		std::cout << err << std::endl;
 
 	//PrintInfo(attrib_, shapes_, materials_);
+}
+
+glm::vec3 Light::GenOneSample()
+{
+	int idx = dst(mt);
+	double r1 = zero_one(mt);
+	double r2 = zero_one(mt);
+	return li_triangle_[idx]->SampleOne(r1,r2);
 }

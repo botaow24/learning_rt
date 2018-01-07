@@ -8,8 +8,8 @@ class PinholeCam
 {
 	//static part
 
-	static const int height = 960;
-	static const int width = 960;
+	static const int height = 960  ;
+	static const int width = 960 ;
 public:
 	~PinholeCam() ;
 
@@ -21,7 +21,7 @@ public:
 	void run();
 
 private:
-	glm::vec4 PathIntegrator(Ray &);
+	glm::vec4 PathIntegrator(const Ray &);
 	glm::vec4 simpleShader(Ray &);
 	PinholeCam() ;
 	void ThreadMain();

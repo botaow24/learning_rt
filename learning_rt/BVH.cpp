@@ -50,10 +50,10 @@ bool BVH::Intersect(const Ray & r, SurfaceInteraction & surf, const Triangle * &
 			{
 				for (size_t st = current.start_id_or_second_child; st < current.start_id_or_second_child + current.number_of_triangle; st++)
 				{
-					glm::vec3 bec;
+
 					float tHit;
 					const Triangle & tri = * triangle_order_list_[st];
-					if (tri.Intersect(r, bec, tHit) == true)
+					if (tri.Intersect(r, surf, tHit) == true)
 					{
 						r.tMax_ = tHit;
 						tri_hit = &tri;
