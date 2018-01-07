@@ -286,7 +286,7 @@ void Scene::objLoader(const std::string & objname, const std::string & folder_pa
 	if (ret == false)
 		std::cout << err << std::endl;
 
-	//PrintInfo(attrib_, shapes_, materials_);
+	PrintInfo(attrib_, shapes_, materials_);
 }
 
 glm::vec3 Light::GenOneSample()

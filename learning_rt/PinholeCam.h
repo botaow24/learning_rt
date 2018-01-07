@@ -8,8 +8,8 @@ class PinholeCam
 {
 	//static part
 
-	static const int height = 960  ;
-	static const int width = 960 ;
+	static const int height = 640 ;
+	static const int width = 640;
 public:
 	~PinholeCam() ;
 
@@ -34,4 +34,6 @@ private:
 	cv::Mat img_;
 	bool rendering_done = false;
 
+	std::mt19937 mt;
+	std::uniform_real_distribution<float> zero_one;
 };

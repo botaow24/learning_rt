@@ -12,7 +12,7 @@
 PinholeCam::PinholeCam()
 	:img_(cv::Size(width, height), CV_8UC4)
 {
-
+	mt.seed((unsigned int)time(nullptr));
 }
 
 
@@ -48,7 +48,7 @@ bool PinholeCam::FetchBlock(int & out_w_idx, int & out_h_idx)
 		current_w_idx = 0;
 		current_h_idx++;
 	}
-	printf("%f %% \n",counter * 1.0f/ (height* width / g_blocksize/ g_blocksize) * 100);
+	printf("\r%f %% ",counter * 1.0f/ (height* width / g_blocksize/ g_blocksize) * 100);
 	counter++;
 	mtx.unlock();
 	return true;
@@ -87,7 +87,7 @@ glm::vec4 PinholeCam::PathIntegrator(const Ray & ray)
 {
 	Ray main_ray = ray;
 	glm::vec4 result(0.0f) , beta(1.0f);
-	const int max_deep = 16;
+	const int max_deep = 15;
 	for (int iter_num = 0;; iter_num++)
 	{
 		SurfaceInteraction surf;
@@ -97,26 +97,72 @@ glm::vec4 PinholeCam::PathIntegrator(const Ray & ray)
 			break;
 		int idx = ptr->GetMatId();
 		const tinyobj::material_t & mat = Scene::GetIns().GetMat()[idx];
+		beta *= glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f);
+
 		if (true)
 		{
 			auto &li = Scene::GetIns().li;
 			glm::vec3 li_pos = li->GenOneSample();
-			Ray final_ray = surf.SpawnRay(li_pos - surf.point_);
+			glm::vec3 dir = glm::normalize(li_pos - surf.point_);
+			Ray final_ray = surf.SpawnRay(dir);
 			//(surf.point_, );
 			final_ray.initRay();
 			SurfaceInteraction surffn;
 			const Triangle *trfn = nullptr;
 			Scene::GetIns().findIntersectBVH(final_ray, surffn, trfn);
+
 			if (trfn != nullptr && li->testMesh(trfn->GetMesh()))
 			{
-				const tinyobj::material_t & mat = Scene::GetIns().GetMat()[idx];
-				result += glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f);
+				/*
+				glm::vec3 w = glm::normalize(surf.normal_);
+				glm::vec3 u = glm::normalize(fabs(w.x) > 0.1 ? glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), w) : glm::cross(glm::vec3(1.0, 0.0, 0.0f), w));
+				glm::vec3 v = glm::normalize(glm::cross(w, u));
+
+				glm::vec3 sw = glm::normalize(surffn.normal_);
+				glm::vec3 su = glm::normalize(fabs(sw.x) > 0.1 ? glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), sw) : glm::cross(glm::vec3(1.0, 0.0, 0.0f), sw));
+				glm::vec3 sv = glm::normalize(glm::cross(sw, su));
+
+				double cos_a_max = sqrt(1 - sp.rad*sp.rad / (x - sp.p).dot(x - sp.p));
+				*/
+				/*
+				float  length = glm::length(surffn.point_ - final_ray.o_);
+				if (length < 0.0001)
+				{
+					result += beta* glm::vec4(1.0f);
+				}
+				else
+				{
+					result += (beta * glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f)) / (length);
+				}
+				*/
+				glm::vec4 eng = beta * li->color_ * abs(glm::dot(surf.normal_, dir) * 2 * abs(glm::dot(surffn.normal_, dir)));
+				result +=  eng;
 			}
 		}
 
+		float mb = std::max(beta[0], std::max(beta[1], beta[2]));
+		if (iter_num > 0 && zero_one(mt) > mb)
+			break;
 
+		// diffuse
+		if (true)
+		{
+			float r1 = zero_one(mt) * 2 * 3.14159265f;
+			float r2 = zero_one(mt);
+			float sqr2 = sqrt(r2);
+			float mx = std::max(mat.diffuse[0], std::max(mat.diffuse[1], mat.diffuse[2]));
 
-		break;
+			float  length = glm::length(surf.point_ - main_ray.o_);
+
+			glm::vec3 w = glm::normalize(surf.normal_);
+			glm::vec3 u = glm::normalize(fabs(w.x) > 0.1 ? glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), w) : glm::cross(glm::vec3(1.0, 0.0, 0.0f), w));
+			glm::vec3 v = glm::normalize(glm::cross(w,u));
+			glm::vec3 direct = (u*cos(r1)*sqr2 + v*sin(r1)*sqr2 + w*sqrt(1 - r2));
+			Ray nr= surf.SpawnRay(direct);
+			main_ray = nr;
+		}
+		if (glm::length(beta) <= 1 + 1e-6f)
+			break;
 
 	}
 	return result;
@@ -197,7 +243,7 @@ void PinholeCam::run()
 	std::thread displayThread(&PinholeCam::DispThread, this);
 
 	unsigned int num_core = std::thread::hardware_concurrency();
-//	num_core = 1;
+	//num_core = 1;
 	if (num_core == 0)
 	{
 		std::cout << "Get core count failed" << std::endl;

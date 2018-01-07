@@ -202,6 +202,10 @@ bool Triangle::Intersect(const Ray & r, const glm::vec3(&p)[3], SurfaceInteracti
 	glm::vec3 norm[3];
 	GetNorm(norm);
 	surf.normal_ = b0 * norm[0] + b1 * norm[1] + b2 * norm[2];
+	if (glm::dot(surf.normal_, r.d_) < 0.0f)
+	{
+		surf.normal_ = -surf.normal_;
+	}
 	out_thit = dis;
 	return true;
 }
@@ -214,3 +218,4 @@ void Triangle::GetNorm(glm::vec3(&p)[3]) const
 		p[i] = glm::vec3(attrib_->normals[nid * 3], attrib_->normals[nid * 3 + 1], attrib_->normals[nid * 3 + 2]);
 	}
 }
+

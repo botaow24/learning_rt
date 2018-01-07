@@ -8,7 +8,7 @@ class SurfaceInteraction;
 class Light
 {
 public:
-	Light():zero_one(0.0, 1.0) {mt.seed((unsigned int)time(nullptr)); }
+	Light():zero_one(0.0, 1.0),color_(1.0f) {mt.seed((unsigned int)time(nullptr)); }
 
 	bool testMesh( const tinyobj::shape_t * s)const { return s == li_mesh; };
 	bool testMesh(const tinyobj::mesh_t * s)const { return s == &li_mesh->mesh; };
