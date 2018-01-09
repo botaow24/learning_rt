@@ -3,6 +3,7 @@ const int g_blocksize = 64;
 const int g_color_channel = 4;
 
 class Ray;
+class SurfaceInteraction;
 
 class PinholeCam
 {
@@ -21,6 +22,7 @@ public:
 	void run();
 
 private:
+	glm::vec4 DirectLightingIntegrator(const Ray &);
 	glm::vec4 PathIntegrator(const Ray &);
 	glm::vec4 simpleShader(Ray &);
 	PinholeCam() ;
@@ -28,6 +30,7 @@ private:
 	bool FetchBlock(int & out_w_idx,int & out_h_idx);
 	void GenRay(int w, int h, Ray & r);
 	void DispThread();
+
 	void showImage();
 private:
 	glm::vec4 image_[width][height]; // final image result

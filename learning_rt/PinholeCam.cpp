@@ -82,23 +82,51 @@ void PinholeCam::DispThread()
 
 	cv::waitKey(0);
 }
+glm::vec4 PinholeCam::DirectLightingIntegrator(const Ray & ray)
+{
+	auto &li = Scene::GetIns().li;
+	glm::vec4 result = glm::vec4(0.0f);
+	Ray main_ray = ray;
+	SurfaceInteraction surf;
+	const Triangle *ptr = nullptr;
+	Scene::GetIns().findIntersectBVH(main_ray, surf, ptr);
+	if (ptr == nullptr)
+	{
+		return result;
+	}
+	
+	if (li->testMesh(ptr->GetMesh()))
+	{
 
+	}
+	return result;
+}
 glm::vec4 PinholeCam::PathIntegrator(const Ray & ray)
 {
+	auto &li = Scene::GetIns().li;
 	Ray main_ray = ray;
 	glm::vec4 result(0.0f) , beta(1.0f);
-	const int max_deep = 15;
+	const int max_deep = 3;
 	for (int iter_num = 0;; iter_num++)
 	{
 		SurfaceInteraction surf;
 		const Triangle *ptr = nullptr;
 		Scene::GetIns().findIntersectBVH(main_ray, surf, ptr);
 		if (ptr == nullptr || iter_num >= max_deep)
+		{
+			//std::cout << "miss" << std::endl;
 			break;
+		}
 		int idx = ptr->GetMatId();
 		const tinyobj::material_t & mat = Scene::GetIns().GetMat()[idx];
-		beta *= glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f);
-
+		if (li->testMesh(ptr->GetMesh()))
+		{
+			//std::cout << "hit" << std::endl;
+			result += beta * glm::vec4(4.0f);
+			break;
+		}
+		//beta *= glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f);
+		/*
 		if (true)
 		{
 			auto &li = Scene::GetIns().li;
@@ -110,21 +138,10 @@ glm::vec4 PinholeCam::PathIntegrator(const Ray & ray)
 			SurfaceInteraction surffn;
 			const Triangle *trfn = nullptr;
 			Scene::GetIns().findIntersectBVH(final_ray, surffn, trfn);
-
-			if (trfn != nullptr && li->testMesh(trfn->GetMesh()))
+			float length0 = glm::length(li_pos - surf.point_);
+			float length1 = glm::length(surffn.point_ - surf.point_);
+			if (trfn != nullptr &&  abs(length0 - length1) < 0.00001     && li->testMesh(trfn->GetMesh()))
 			{
-				/*
-				glm::vec3 w = glm::normalize(surf.normal_);
-				glm::vec3 u = glm::normalize(fabs(w.x) > 0.1 ? glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), w) : glm::cross(glm::vec3(1.0, 0.0, 0.0f), w));
-				glm::vec3 v = glm::normalize(glm::cross(w, u));
-
-				glm::vec3 sw = glm::normalize(surffn.normal_);
-				glm::vec3 su = glm::normalize(fabs(sw.x) > 0.1 ? glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), sw) : glm::cross(glm::vec3(1.0, 0.0, 0.0f), sw));
-				glm::vec3 sv = glm::normalize(glm::cross(sw, su));
-
-				double cos_a_max = sqrt(1 - sp.rad*sp.rad / (x - sp.p).dot(x - sp.p));
-				*/
-				/*
 				float  length = glm::length(surffn.point_ - final_ray.o_);
 				if (length < 0.0001)
 				{
@@ -132,17 +149,17 @@ glm::vec4 PinholeCam::PathIntegrator(const Ray & ray)
 				}
 				else
 				{
-					result += (beta * glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f)) / (length);
+					result += beta * abs(glm::dot(surf.normal_, dir)) * abs(glm::dot(surffn.normal_, dir)) * glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f) / (length * length);
 				}
-				*/
-				glm::vec4 eng = beta * li->color_ * abs(glm::dot(surf.normal_, dir) * 2 * abs(glm::dot(surffn.normal_, dir)));
-				result +=  eng;
+			
+				//glm::vec4 eng = beta * li->color_ * abs(glm::dot(surf.normal_, dir) * 2 * abs(glm::dot(surffn.normal_, dir)));
+				//result +=  eng;
 			}
 		}
-
-		float mb = std::max(beta[0], std::max(beta[1], beta[2]));
-		if (iter_num > 0 && zero_one(mt) > mb)
-			break;
+		*/
+	//	float mb = std::max(beta[0], std::max(beta[1], beta[2]));
+	//	if (iter_num > 5 && zero_one(mt) > mb)
+	//		break;
 
 		// diffuse
 		if (true)
@@ -158,12 +175,16 @@ glm::vec4 PinholeCam::PathIntegrator(const Ray & ray)
 			glm::vec3 u = glm::normalize(fabs(w.x) > 0.1 ? glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), w) : glm::cross(glm::vec3(1.0, 0.0, 0.0f), w));
 			glm::vec3 v = glm::normalize(glm::cross(w,u));
 			glm::vec3 direct = (u*cos(r1)*sqr2 + v*sin(r1)*sqr2 + w*sqrt(1 - r2));
+			//std::cout << glm::dot(w, u)<< " " << glm::dot(w, v) <<std::endl;
 			Ray nr= surf.SpawnRay(direct);
 			main_ray = nr;
+			if (mx == 0)
+				break;
+	
+			beta = beta * glm::vec4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0f)  * 2.0f * 3.1415926f ;
+			if (iter_num > 5)
+				beta /= mx;
 		}
-		if (glm::length(beta) <= 1 + 1e-6f)
-			break;
-
 	}
 	return result;
 }
@@ -202,7 +223,7 @@ void PinholeCam::ThreadMain()
 				int pixel_w = w_idx + w_base_idx * g_blocksize;
 				int pixel_h = h_idx + h_base_idx * g_blocksize;
 				GenRay(pixel_w, pixel_h, main_ray);
-				const int sample_count = 128;
+				const int sample_count = 1024;
 				for(int i = 0; i < sample_count;i++)
 				{
 					dv += PathIntegrator(main_ray);

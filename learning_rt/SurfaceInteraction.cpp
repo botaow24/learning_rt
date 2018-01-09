@@ -13,6 +13,6 @@ SurfaceInteraction::~SurfaceInteraction()
 
 Ray SurfaceInteraction::SpawnRay(const glm::vec3 & dir)
 {
-	Ray r(point_ - normal_ * 0.0001f, dir);
+	Ray r(point_ + normal_ * 0.0001f, dir);
 	return r;
 }
