@@ -30,7 +30,18 @@ BB3 BB3::Cent()
 	return BB3((max_+ min_)/2.0f);
 }
 
-int BB3::GetMaxDim()
+float BB3::SurfaceArea()
+{
+	if (std::isfinite(min_.x) == false)
+		return 0.0f;
+	glm::vec3 diff = max_ - min_;
+	float s1 = diff.x * diff.y;
+	float s2 = diff.y * diff.z;
+	float s3 = diff.z * diff.x;
+	return (s1 + s2 + s3) * 2;
+}
+
+char BB3::GetMaxDim()
 {
 	glm::vec3 diff = max_ - min_;
 	if (diff.x > diff.y)
@@ -48,6 +59,20 @@ int BB3::GetMaxDim()
 			return 2;
 	}
 	return 0;
+}
+
+glm::vec3 BB3::invRange() const
+{
+	glm::vec3 r(0.0f);
+	glm::vec3 diff = max_ - min_;
+	for (int i = 0; i < 3; i++)
+	{
+		if (diff[i] > 0)
+		{
+			r[i] = 1.0f / diff[i];
+		}
+	}
+	return r;
 }
 
 bool BB3::Intersect(const Ray &r,float & tClose, float & tFar) const

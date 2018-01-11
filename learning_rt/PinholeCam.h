@@ -9,8 +9,8 @@ class PinholeCam
 {
 	//static part
 
-	static const int height = 640 ;
-	static const int width = 640;
+	static const int height = 960 ;
+	static const int width = 960;
 public:
 	~PinholeCam() ;
 

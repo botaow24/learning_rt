@@ -223,7 +223,7 @@ void PinholeCam::ThreadMain()
 				int pixel_w = w_idx + w_base_idx * g_blocksize;
 				int pixel_h = h_idx + h_base_idx * g_blocksize;
 				GenRay(pixel_w, pixel_h, main_ray);
-				const int sample_count = 1024;
+				const int sample_count = 256 ;
 				for(int i = 0; i < sample_count;i++)
 				{
 					dv += PathIntegrator(main_ray);

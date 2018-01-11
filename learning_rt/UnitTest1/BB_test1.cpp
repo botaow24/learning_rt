@@ -74,5 +74,19 @@ namespace BBTest1
 			Assert::IsFalse(hit);
 		}
 		
+		TEST_METHOD(bb_Intersect_too_far)
+		{
+			Ray r(glm::vec3(0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+			r.initRay();
+			r.tMax_ = 0.5;
+			BB3 bb;
+			bb.min_ = glm::vec3(1.0f, 1.0f, 1.0f);
+			bb.max_ = glm::vec3(2.0f, 2.0f, 2.0f);
+			float near, far;
+			bool hit = bb.Intersect(r, near, far);
+
+			Assert::IsFalse(hit);
+		}
+
 	};
 }
