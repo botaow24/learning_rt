@@ -12,8 +12,9 @@ BVH::~BVH()
 {
 }
 
-size_t BVH::buildFlatBVH(BVHNode * node_root)
+size_t BVH::buildFlatBVH(BVHNode * node_root,int deepth)
 {
+	bvh_deep = std::max(deepth, bvh_deep);
 	BVHFlatNode flat;
 	flat.bb_ = node_root->bb_;
 	flat.number_of_triangle = node_root->num;
@@ -27,12 +28,13 @@ size_t BVH::buildFlatBVH(BVHNode * node_root)
 	}
 	else // (node_root->num != 0)
 	{
-		buildFlatBVH(node_root->child[0]);
-		size_t second_idx = buildFlatBVH(node_root->child[1]);
+		buildFlatBVH(node_root->child[0], deepth + 1);
+		size_t second_idx = buildFlatBVH(node_root->child[1], deepth + 1);
 		bvh_node_[current_idx].start_id_or_second_child = second_idx;
 		bvh_node_[current_idx].axis_ = node_root->axis_;
 		return current_idx;
 	}
+
 }
 
 bool BVH::Intersect(const Ray & r, SurfaceInteraction & surf, const Triangle * &tri_hit) const
@@ -41,7 +43,7 @@ bool BVH::Intersect(const Ray & r, SurfaceInteraction & surf, const Triangle * &
 	tri_hit = nullptr;
 	size_t currentindex = 0;
 	std::vector<size_t> to_visit;
-	to_visit.reserve(bvh_node_.size());
+	to_visit.reserve(bvh_deep);
 
 	bool axis_positive[3];
 	axis_positive[0] = r.d_.x > 0; // x direction positive 
@@ -101,9 +103,9 @@ bool BVH::Intersect(const Ray & r, SurfaceInteraction & surf, const Triangle * &
 void BVH::BVHBuilder(std::vector<Triangle*>&tri_list)
 {
 	auto root = BVHBuilder(tri_list,0, tri_list.size());
-	buildFlatBVH(root);
+	buildFlatBVH(root,1);
 	delete root;
-	std::cout << "bvh" << bvh_node_.size() << std::endl;
+	std::cout << "bvh" << bvh_node_.size() <<" deepth " << bvh_deep << std::endl;
 }
 
 BVHNode * BVH::BVHBuilder(std::vector<Triangle *>& tri_list, size_t start, size_t end)
