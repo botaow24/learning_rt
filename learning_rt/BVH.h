@@ -38,10 +38,11 @@ public:
 	void BVHBuilder(std::vector<Triangle *>&);
 private:
 	BVHNode * BVHBuilder(std::vector<Triangle *>&, size_t start, size_t end);
-	size_t buildFlatBVH(BVHNode * node_root);
+	size_t buildFlatBVH(BVHNode * node_root,int i);
 private:
 	std::vector<BVHFlatNode> bvh_node_;
 	std::vector<Triangle *> triangle_order_list_;
 	SplitMethod sm = SplitMethod::SAH;
+	int bvh_deep = 0;
 };
 
