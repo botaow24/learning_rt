@@ -15,7 +15,8 @@ public:
 	mutable float tMax_;
 
 	// Sheer
-	float  sx,sy, sz;
+	float sx,sy, sz;
+	glm::vec3 inv_d_;
 private:
 	void computePermute();
 	void computeSheer();

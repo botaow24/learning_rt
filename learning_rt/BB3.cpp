@@ -81,7 +81,7 @@ bool BB3::Intersect(const Ray &r,float & tClose, float & tFar) const
 	float t1 = r.tMax_;
 	for (int i = 0; i < 3; i++)
 	{
-		float invRay = 1 / r.d_[i];
+		float invRay = r.inv_d_[i];
 		float near = (min_[i] - r.o_[i]) * invRay;
 		float far = (max_[i] - r.o_[i])  * invRay;
 

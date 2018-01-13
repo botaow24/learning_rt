@@ -118,7 +118,7 @@ BVHNode * BVH::BVHBuilder(std::vector<Triangle *>& tri_list, size_t start, size_
 		allCent = allCent.Union(Tri.Cent());
 	}
 	// only one node, return left
-	if (tri_num == 1)
+	if (tri_num <= 1)
 	{
 		triangle_order_list_.emplace_back(tri_list[start]);
 		auto node = new BVHNode;

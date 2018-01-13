@@ -287,6 +287,11 @@ void Scene::objLoader(const std::string & objname, const std::string & folder_pa
 		std::cout << err << std::endl;
 
 	PrintInfo(attrib_, shapes_, materials_);
+	if (attrib_.vertices.size() / 3 == 0)
+	{
+		getchar();
+		exit(0);
+	}
 }
 
 glm::vec3 Light::GenOneSample()

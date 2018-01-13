@@ -22,6 +22,10 @@ void Ray::initRay()
 {
 	computePermute();
 	computeSheer();
+	for (int i = 0; i < 3; i++)
+	{
+		inv_d_[i] = 1.0f / d_[i];
+	}
 }
 
 void Ray::computePermute()
